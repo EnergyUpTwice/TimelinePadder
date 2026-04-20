@@ -1,0 +1,52 @@
+name: Build & Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore TimelinePadder.csproj
+
+      - name: Build project
+        run: msbuild TimelinePadder.csproj -t:rebuild -property:Configuration=Release -property:Platform="Any CPU"
+
+      - name: Zip the DLL
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "bin\Any CPU\Release\net48\TimelinePadder.dll" -DestinationPath TimelinePadder.zip
+
+      - name: Create GitHub Release & Upload
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "TimelinePadder ${{ github.ref_name }}"
+          body: |
+            ## 安装方法
+            下载 `TimelinePadder.zip`，解压后将 DLL 放入 Subtitle Edit 的 `Plugins` 文件夹。
+          files: TimelinePadder.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

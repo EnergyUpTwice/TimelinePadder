@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>TimelinePadder</AssemblyName>
+    <RootNamespace>Nikse.SubtitleEdit.PluginLogic</RootNamespace>
+    <Nullable>disable</Nullable>
+    <!-- 必须 Any CPU，不能选 x86/x64 -->
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TimelinePadder.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
