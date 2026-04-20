@@ -1,4 +1,4 @@
-name: Build & Release Plugin
+name: Release Plugin
 
 on:
   push:
@@ -9,8 +9,11 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# 必须包含以下三个权限，且必须全部小写
 permissions:
+  id-token: write
   contents: write
+  attestations: write
 
 jobs:
   build:
@@ -37,6 +40,12 @@ jobs:
         run: |
           Compress-Archive -Path "bin\Any CPU\Release\net48\TimelinePadder.dll" -DestinationPath TimelinePadder.zip
 
+      # 新增：安全签名步骤，对生成的 zip 进行溯源签名
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'TimelinePadder.zip'
+
       - name: Create GitHub Release & Upload
         uses: softprops/action-gh-release@v2
         with:
@@ -45,8 +54,8 @@ jobs:
           body: |
             ## 安装方法
             下载 `TimelinePadder.zip`，解压后将 DLL 放入 Subtitle Edit 的 `Plugins` 文件夹。
+            
+            > **安全提示**：此发布版本已包含 GitHub 原生 Attestation 签名，确保构建过程未被篡改。
           files: TimelinePadder.zip
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
